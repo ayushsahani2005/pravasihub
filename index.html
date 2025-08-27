@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pravasi Hub - Compare Cab Prices Across All Platforms</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .platform-card {
+            transition: all 0.2s ease;
+        }
+        .platform-card:hover {
+            transform: scale(1.02);
+        }
+        .price-animation {
+            animation: priceUpdate 0.5s ease-in-out;
+        }
+        @keyframes priceUpdate {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .location-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header with Logo -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <!-- Logo -->
+                    <div class="bg-white p-3 rounded-xl shadow-lg">
+                        <svg class="w-10 h-10 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                            <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold">Pravasi Hub</h1>
+                        <p class="text-sm text-purple-200">Compare. Choose. Save.</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#compare" class="hover:text-purple-200 transition-colors">Compare Prices</a>
+                    <a href="#addresses" class="hover:text-purple-200 transition-colors">Nearby Addresses</a>
+                    <a href="#vehicles" class="hover:text-purple-200 transition-colors">Vehicles</a>
+                    <a href="#features" class="hover:text-purple-200 transition-colors">Features</a>
+                    <a href="#contact" class="hover:text-purple-200 transition-colors">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold mb-6">Compare Cab Prices Across All Platforms</h2>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">Get the best deals from Ola, Uber, Rapido, and more - all in one place. Save time and money with instant price comparisons!</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="scrollToCompare()" class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                    Start Comparing Prices
+                </button>
+                <button onclick="getCurrentLocation()" class="bg-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-purple-700 transition-colors shadow-lg border-2 border-white">
+                    📍 Use My Location
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Current Location Display -->
+    <section id="currentLocation" class="py-8 bg-indigo-50 hidden">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto bg-white rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-green-100 p-3 rounded-full location-pulse">
+                            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800">Your Current Location</h4>
+                            <p id="currentAddress" class="text-gray-600">Detecting location...</p>
+                        </div>
+                    </div>
+                    <button onclick="useCurrentLocationAsPickup()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Use as Pickup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Price Comparison Section -->
+    <section id="compare" class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Compare Prices Instantly</h3>
+            <div class="max-w-4xl mx-auto bg-gray-50 rounded-xl p-8 shadow-lg">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">From</label>
+                        <div class="relative">
+                            <input type="text" id="fromLocation" placeholder="Enter pickup location" class="w-full p-4 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <button onclick="useGPSForPickup()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-600 hover:text-indigo-800">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">To</label>
+                        <div class="relative">
+                            <input type="text" id="toLocation" placeholder="Enter destination" class="w-full p-4 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <button onclick="useGPSForDestination()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-600 hover:text-indigo-800">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">Date</label>
+                        <input type="date" id="rideDate" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">Time</label>
+                        <input type="time" id="rideTime" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">Vehicle Type</label>
+                        <select id="vehicleFilter" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="all">All Vehicles</option>
+                            <option value="auto">Auto Rickshaw</option>
+                            <option value="bike">Bike</option>
+                            <option value="mini">Mini/Hatchback</option>
+                            <option value="sedan">Sedan</option>
+                            <option value="suv">SUV/Premium</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="comparePrices()" class="w-full gradient-bg text-white py-4 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity">
+                    🔍 Compare Prices Now
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nearby Addresses Section -->
+    <section id="addresses" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-4">Nearby Popular Addresses</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto">Find popular destinations and addresses near you using GPS location</p>
+            </div>
+            
+            <div class="max-w-6xl mx-auto">
+                <div class="bg-white rounded-xl p-6 shadow-lg mb-8">
+                    <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-indigo-100 p-3 rounded-full">
+                                <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold">GPS Location Services</h4>
+                                <p class="text-gray-600">Enable location to see nearby addresses</p>
+                            </div>
+                        </div>
+                        <button onclick="findNearbyAddresses()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                            📍 Find Nearby Places
+                        </button>
+                    </div>
+                </div>
+
+                <div id="nearbyAddresses" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Addresses will be populated here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Addresses Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-4">Community Shared Addresses</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto">Addresses shared by other users in your area</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white mb-8">
+                    <div class="flex flex-col sm:flex-row items-center justify-between">
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Share Your Address</h4>
+                            <p class="text-purple-100">Help others find popular destinations</p>
+                        </div>
+                        <button onclick="shareMyAddress()" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors mt-4 sm:mt-0">
+                            📤 Share Address
+                        </button>
+                    </div>
+                </div>
+
+                <div id="communityAddresses" class="space-y-4">
+                    <!-- Community addresses will be populated here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Price Results -->
+    <section id="priceResults" class="py-16 bg-gray-50 hidden">
+        <div class="container mx-auto px-6">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Price Comparison Results</h3>
+            <div id="resultsContainer" class="max-w-6xl mx-auto">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Available Vehicles Section -->
+    <section id="vehicles" class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Available Vehicles Across Platforms</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-6 text-white card-hover">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🛺</div>
+                        <h4 class="text-xl font-bold mb-2">Auto Rickshaw</h4>
+                        <p class="text-sm opacity-90 mb-3">3-wheeler, budget-friendly</p>
+                        <div class="text-xs bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            Available on: Ola, Uber, Rapido
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-6 text-white card-hover">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🏍️</div>
+                        <h4 class="text-xl font-bold mb-2">Bike Taxi</h4>
+                        <p class="text-sm opacity-90 mb-3">Fast & economical</p>
+                        <div class="text-xs bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            Available on: Rapido, Ola Bike
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-green-500 to-teal-600 rounded-xl p-6 text-white card-hover">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🚗</div>
+                        <h4 class="text-xl font-bold mb-2">Mini/Hatchback</h4>
+                        <p class="text-sm opacity-90 mb-3">Compact cars, AC comfort</p>
+                        <div class="text-xs bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            Available on: All platforms
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl p-6 text-white card-hover">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🚙</div>
+                        <h4 class="text-xl font-bold mb-2">Sedan</h4>
+                        <p class="text-sm opacity-90 mb-3">Spacious & comfortable</p>
+                        <div class="text-xs bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            Available on: Ola, Uber
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-6 text-white card-hover">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🚐</div>
+                        <h4 class="text-xl font-bold mb-2">SUV/Premium</h4>
+                        <p class="text-sm opacity-90 mb-3">Luxury & premium comfort</p>
+                        <div class="text-xs bg-white bg-opacity-20 rounded-full px-3 py-1">
+                            Available on: Uber, Ola Premium
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Unique Features Section -->
+    <section id="features" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Unique Features That Save You Money</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 text-center">GPS Location Services</h4>
+                    <p class="text-gray-600 text-center">Automatically detect your location and find nearby addresses</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 text-center">Community Addresses</h4>
+                    <p class="text-gray-600 text-center">Access addresses shared by other users in your area</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 text-center">Real-Time Price Tracking</h4>
+                    <p class="text-gray-600 text-center">Live price updates with surge pricing alerts across all platforms</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover">
+                    <div class="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 text-center">Smart Recommendations</h4>
+                    <p class="text-gray-600 text-center">AI-powered suggestions based on your location and travel patterns</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover">
+                    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 text-center">Multi-Platform Booking</h4>
+                    <p class="text-gray-600 text-center">Book directly through your preferred platform with one click</p>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-lg card-hover">
+                    <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 text-center">Address History</h4>
+                    <p class="text-gray-600 text-center">Save and quickly access your frequently used addresses</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Supported Platforms -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Supported Platforms</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                <div class="bg-black text-white rounded-xl p-6 text-center platform-card">
+                    <div class="text-3xl mb-3">🚗</div>
+                    <h4 class="text-xl font-bold">Uber</h4>
+                    <p class="text-sm text-gray-300 mt-2">Global ride-hailing leader</p>
+                </div>
+                <div class="bg-green-500 text-white rounded-xl p-6 text-center platform-card">
+                    <div class="text-3xl mb-3">🛺</div>
+                    <h4 class="text-xl font-bold">Ola</h4>
+                    <p class="text-sm text-green-100 mt-2">India's homegrown cab service</p>
+                </div>
+                <div class="bg-blue-600 text-white rounded-xl p-6 text-center platform-card">
+                    <div class="text-3xl mb-3">🏍️</div>
+                    <h4 class="text-xl font-bold">Rapido</h4>
+                    <p class="text-sm text-blue-100 mt-2">Bike taxi specialist</p>
+                </div>
+                <div class="bg-purple-600 text-white rounded-xl p-6 text-center platform-card">
+                    <div class="text-3xl mb-3">🚙</div>
+                    <h4 class="text-xl font-bold">Others</h4>
+                    <p class="text-sm text-purple-100 mt-2">Local & regional services</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="bg-white p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-bold">Pravasi Hub</h4>
+                    </div>
+                    <p class="text-purple-200">Your smart cab price comparison platform</p>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Features</h5>
+                    <ul class="space-y-2 text-purple-200">
+                        <li>Price Comparison</li>
+                        <li>GPS Location</li>
+                        <li>Smart Alerts</li>
+                        <li>Community Addresses</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Platforms</h5>
+                    <ul class="space-y-2 text-purple-200">
+                        <li>Uber</li>
+                        <li>Ola</li>
+                        <li>Rapido</li>
+                        <li>Local Services</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-4">Contact</h5>
+                    <ul class="space-y-2 text-purple-200">
+                        <li>📞 +91 98765 43210</li>
+                        <li>✉️ support@pravasihub.com</li>
+                        <li>📍 Bangalore, India</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-purple-400 mt-8 pt-8 text-center text-purple-200">
+                <p>&copy; 2024 Pravasi Hub. All rights reserved. | Compare. Choose. Save.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables for location
+        let userLocation = null;
+        let userAddress = '';
+
+        // Set today's date and current time as defaults
+        document.getElementById('rideDate').valueAsDate = new Date();
+        const now = new Date();
+        const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('rideTime').value = timeString;
+
+        // Sample nearby places data
+        const sampleNearbyPlaces = [
+            { name: 'Phoenix Mall', category: 'Shopping Mall', distance: '0.8 km', address: 'Whitefield Main Road, Bangalore' },
+            { name: 'Manipal Hospital', category: 'Hospital', distance: '1.2 km', address: 'HAL Airport Road, Bangalore' },
+            { name: 'Forum Mall', category: 'Shopping Mall', distance: '2.1 km', address: 'Hosur Road, Koramangala' },
+            { name: 'Bangalore Railway Station', category: 'Transport Hub', distance: '3.5 km', address: 'Majestic, Bangalore City' },
+            { name: 'UB City Mall', category: 'Shopping Mall', distance: '4.2 km', address: 'Vittal Mallya Road, Bangalore' },
+            { name: 'Kempegowda Airport', category: 'Airport', distance: '25 km', address: 'Devanahalli, Bangalore' }
+        ];
+
+        // Sample community addresses
+        const sampleCommunityAddresses = [
+            { name: 'Rajesh Kumar', address: 'Brigade Road, Near Commercial Street', type: 'Shopping Area', shared: '2 hours ago' },
+            { name: 'Priya Sharma', address: 'Indiranagar 100 Feet Road, Near Metro Station', type: 'Metro Station', shared: '5 hours ago' },
+            { name: 'Amit Patel', address: 'Koramangala 5th Block, Near Jyoti Nivas College', type: 'Educational', shared: '1 day ago' },
+            { name: 'Sneha Reddy', address: 'HSR Layout Sector 1, Near BDA Complex', type: 'Residential', shared: '2 days ago' }
+        ];
+
+        function scrollToCompare() {
+            document.getElementById('compare').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // GPS Location Functions
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by this browser.');
+                return;
+            }
+
+            const button = event.target;
+            button.innerHTML = '🔄 Getting Location...';
+            button.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Simulate reverse geocoding (in real app, use Google Maps API)
+                    const addresses = [
+                        'Whitefield Main Road, Bangalore, Karnataka 560066',
+                        'Koramangala 5th Block, Bangalore, Karnataka 560095',
+                        'Indiranagar 100 Feet Road, Bangalore, Karnataka 560038',
+                        'HSR Layout Sector 1, Bangalore, Karnataka 560102'
+                    ];
+                    
+                    userAddress = addresses[Math.floor(Math.random() * addresses.length)];
+                    
+                    document.getElementById('currentAddress').textContent = userAddress;
+                    document.getElementById('currentLocation').classList.remove('hidden');
+                    
+                    button.innerHTML = '✅ Location Found';
+                    setTimeout(() => {
+                        button.innerHTML = '📍 Use My Location';
+                        button.disabled = false;
+                    }, 2000);
+                },
+                function(error) {
+                    let errorMessage = 'Unable to get location. ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Please allow location access.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Location request timed out.';
+                            break;
+                    }
+                    alert(errorMessage);
+                    button.innerHTML = '📍 Use My Location';
+                    button.disabled = false;
+                }
+            );
+        }
+
+        function useCurrentLocationAsPickup() {
+            if (userAddress) {
+                document.getElementById('fromLocation').value = userAddress;
+                document.getElementById('compare').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function useGPSForPickup() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by this browser.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Simulate getting address from coordinates
+                    const addresses = [
+                        'Current Location - Whitefield, Bangalore',
+                        'Current Location - Koramangala, Bangalore',
+                        'Current Location - Indiranagar, Bangalore'
+                    ];
+                    document.getElementById('fromLocation').value = addresses[Math.floor(Math.random() * addresses.length)];
+                },
+                function(error) {
+                    alert('Unable to get your location. Please enter manually.');
+                }
+            );
+        }
+
+        function useGPSForDestination() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by this browser.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Simulate getting address from coordinates
+                    const addresses = [
+                        'Current Location - Whitefield, Bangalore',
+                        'Current Location - Koramangala, Bangalore',
+                        'Current Location - Indiranagar, Bangalore'
+                    ];
+                    document.getElementById('toLocation').value = addresses[Math.floor(Math.random() * addresses.length)];
+                },
+                function(error) {
+                    alert('Unable to get your location. Please enter manually.');
+                }
+            );
+        }
+
+        function findNearbyAddresses() {
+            const button = event.target;
+            button.innerHTML = '🔄 Finding Places...';
+            button.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                displayNearbyAddresses();
+                button.innerHTML = '✅ Places Found';
+                setTimeout(() => {
+                    button.innerHTML = '📍 Find Nearby Places';
+                    button.disabled = false;
+                }, 2000);
+            }, 1500);
+        }
+
+        function displayNearbyAddresses() {
+            const container = document.getElementById('nearbyAddresses');
+            let html = '';
+
+            sampleNearbyPlaces.forEach(place => {
+                html += `
+                    <div class="bg-white rounded-xl p-6 shadow-lg card-hover cursor-pointer" onclick="selectAddress('${place.address}')">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-800">${place.name}</h4>
+                                <p class="text-sm text-gray-500">${place.category}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-semibold text-indigo-600">${place.distance}</div>
+                                <div class="text-xs text-gray-400">away</div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">${place.address}</p>
+                        <div class="flex space-x-2">
+                            <button onclick="event.stopPropagation(); useAsPickup('${place.address}')" class="flex-1 bg-indigo-100 text-indigo-600 py-2 px-3 rounded-lg text-sm hover:bg-indigo-200 transition-colors">
+                                Use as Pickup
+                            </button>
+                            <button onclick="event.stopPropagation(); useAsDestination('${place.address}')" class="flex-1 bg-purple-100 text-purple-600 py-2 px-3 rounded-lg text-sm hover:bg-purple-200 transition-colors">
+                                Use as Destination
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            displayCommunityAddresses();
+        }
+
+        function displayCommunityAddresses() {
+            const container = document.getElementById('communityAddresses');
+            let html = '';
+
+            sampleCommunityAddresses.forEach(addr => {
+                html += `
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-purple-100 p-2 rounded-full">
+                                        <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-gray-800">${addr.name}</h5>
+                                        <p class="text-xs text-gray-500">Shared ${addr.shared}</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 mb-2">${addr.address}</p>
+                                <span class="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">${addr.type}</span>
+                            </div>
+                            <div class="flex flex-col space-y-2 ml-4">
+                                <button onclick="useAsPickup('${addr.address}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+                                    Pickup
+                                </button>
+                                <button onclick="useAsDestination('${addr.address}')" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors">
+                                    Drop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectAddress(address) {
+            // This function can be used for general address selection
+            console.log('Selected address:', address);
+        }
+
+        function useAsPickup(address) {
+            document.getElementById('fromLocation').value = address;
+            document.getElementById('compare').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function useAsDestination(address) {
+            document.getElementById('toLocation').value = address;
+            document.getElementById('compare').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function shareMyAddress() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by this browser.');
+                return;
+            }
+
+            const name = prompt('Enter your name:');
+            if (!name) return;
+
+            const address = prompt('Enter the address you want to share:');
+            if (!address) return;
+
+            const type = prompt('What type of place is this? (e.g., Restaurant, Office, Hospital)');
+            if (!type) return;
+
+            alert(`Thank you ${name}! Your address "${address}" has been shared with the community. Other users can now use this location for their trips.`);
+            
+            // In a real app, this would be sent to a server
+            console.log('Shared address:', { name, address, type });
+        }
+
+        function comparePrices() {
+            const from = document.getElementById('fromLocation').value;
+            const to = document.getElementById('toLocation').value;
+            const vehicleFilter = document.getElementById('vehicleFilter').value;
+            
+            if (!from || !to) {
+                alert('Please enter both pickup and destination locations');
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            button.innerHTML = '🔄 Comparing Prices...';
+            button.disabled = true;
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                generatePriceResults(from, to, vehicleFilter);
+                button.innerHTML = '🔍 Compare Prices Now';
+                button.disabled = false;
+                
+                // Scroll to results
+                document.getElementById('priceResults').scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        }
+
+        function generatePriceResults(from, to, filter) {
+            const distance = Math.floor(Math.random() * 15) + 3; // 3-18 km
+            const baseTime = Math.floor(Math.random() * 30) + 15; // 15-45 minutes
+            
+            const platforms = [
+                { name: 'Uber', color: 'bg-black', logo: '🚗' },
+                { name: 'Ola', color: 'bg-green-500', logo: '🛺' },
+                { name: 'Rapido', color: 'bg-blue-600', logo: '🏍️' },
+                { name: 'Local Cab', color: 'bg-purple-600', logo: '🚙' }
+            ];
+
+            const vehicles = [
+                { type: 'auto', name: 'Auto Rickshaw', emoji: '🛺', basePrice: 25, perKm: 8 },
+                { type: 'bike', name: 'Bike Taxi', emoji: '🏍️', basePrice: 15, perKm: 6 },
+                { type: 'mini', name: 'Mini/Hatchback', emoji: '🚗', basePrice: 40, perKm: 12 },
+                { type: 'sedan', name: 'Sedan', emoji: '🚙', basePrice: 60, perKm: 15 },
+                { type: 'suv', name: 'SUV/Premium', emoji: '🚐', basePrice: 80, perKm: 20 }
+            ];
+
+            let filteredVehicles = filter === 'all' ? vehicles : vehicles.filter(v => v.type === filter);
+            
+            let resultsHTML = `
+                <div class="bg-white rounded-xl p-6 shadow-lg mb-8">
+                    <h4 class="text-xl font-bold mb-4">Trip Details</h4>
+                    <div class="grid md:grid-cols-3 gap-4 text-center">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-indigo-600">${distance} km</div>
+                            <div class="text-gray-600">Distance</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-indigo-600">${baseTime} min</div>
+                            <div class="text-gray-600">Est. Time</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600">₹${Math.floor(Math.random() * 50) + 20}</div>
+                            <div class="text-gray-600">You Save</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            filteredVehicles.forEach(vehicle => {
+                resultsHTML += `
+                    <div class="bg-white rounded-xl p-6 shadow-lg mb-6">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">${vehicle.emoji}</span>
+                            <h4 class="text-2xl font-bold">${vehicle.name}</h4>
+                        </div>
+                        <div class="grid md:grid-cols-4 gap-4">
+                `;
+
+                platforms.forEach(platform => {
+                    const basePrice = vehicle.basePrice;
+                    const tripPrice = basePrice + (distance * vehicle.perKm);
+                    const surge = Math.random() > 0.7 ? Math.random() * 0.5 + 1 : 1;
+                    const finalPrice = Math.round(tripPrice * surge);
+                    const eta = baseTime + Math.floor(Math.random() * 10) - 5;
+                    const available = Math.random() > 0.2;
+
+                    resultsHTML += `
+                        <div class="border rounded-lg p-4 ${available ? 'hover:shadow-md cursor-pointer' : 'opacity-50'} transition-all price-animation">
+                            <div class="flex items-center mb-3">
+                                <div class="${platform.color} text-white p-2 rounded-lg mr-3">
+                                    <span class="text-lg">${platform.logo}</span>
+                                </div>
+                                <div>
+                                    <div class="font-bold">${platform.name}</div>
+                                    <div class="text-sm text-gray-500">${eta} min away</div>
+                                </div>
+                            </div>
+                            ${available ? `
+                                <div class="text-2xl font-bold text-green-600 mb-2">₹${finalPrice}</div>
+                                ${surge > 1 ? `<div class="text-xs text-red-500 mb-2">🔥 ${surge.toFixed(1)}x surge</div>` : ''}
+                                <button onclick="bookRide('${platform.name}', '${vehicle.name}', ${finalPrice})" class="w-full ${platform.color} text-white py-2 rounded-lg text-sm hover:opacity-90 transition-opacity">
+                                    Book Now
+                                </button>
+                            ` : `
+                                <div class="text-gray-500 font-semibold">Not Available</div>
+                                <div class="text-xs text-gray-400">Try again later</div>
+                            `}
+                        </div>
+                    `;
+                });
+
+                resultsHTML += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('resultsContainer').innerHTML = resultsHTML;
+            document.getElementById('priceResults').classList.remove('hidden');
+        }
+
+        function bookRide(platform, vehicle, price) {
+            alert(`🎉 Redirecting to ${platform} to book ${vehicle} for ₹${price}\n\nNote: This is a demo. In the real app, you would be redirected to the ${platform} app or website to complete your booking.`);
+        }
+
+        // Initialize the page
+        window.addEventListener('load', function() {
+            // Auto-load some sample data
+            setTimeout(() => {
+                displayNearbyAddresses();
+            }, 1000);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'975b7451f41ec739',t:'MTc1NjI5NjUwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
